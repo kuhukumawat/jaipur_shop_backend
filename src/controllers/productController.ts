@@ -1,8 +1,7 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import * as productService from '../services/productService';
-import { AuthRequest } from '../middleware/auth';
 
-export const createProduct = async (req: AuthRequest, res: Response) => {
+export const createProduct = async (req: Request, res: Response) => {
   const files = (req.files as Express.Multer.File[]) || [];
   const images = files.map((f) => ({
     url: `/uploads/${f.filename}`,
@@ -18,7 +17,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
   res.status(201).json({ success: true, data: product, message: 'Product created' });
 };
 
-export const getProducts = async (req: AuthRequest, res: Response) => {
+export const getProducts = async (req: Request, res: Response) => {
   const { search, category, page, limit } = req.query;
   const isAdmin = req.user?.role === 'admin';
   const result = await productService.getProducts({
@@ -31,12 +30,12 @@ export const getProducts = async (req: AuthRequest, res: Response) => {
   res.json({ success: true, data: result });
 };
 
-export const getProductById = async (req: AuthRequest, res: Response) => {
+export const getProductById = async (req: Request, res: Response) => {
   const product = await productService.getProductById(req.params.id);
   res.json({ success: true, data: product });
 };
 
-export const updateProduct = async (req: AuthRequest, res: Response) => {
+export const updateProduct = async (req: Request, res: Response) => {
   const data = { ...req.body };
   if (req.body.tags && typeof req.body.tags === 'string') {
     data.tags = req.body.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
@@ -54,12 +53,12 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
   res.json({ success: true, data: product, message: 'Product updated' });
 };
 
-export const deleteProduct = async (req: AuthRequest, res: Response) => {
+export const deleteProduct = async (req: Request, res: Response) => {
   await productService.deleteProduct(req.params.id);
   res.json({ success: true, message: 'Product deleted' });
 };
 
-export const getLowStockProducts = async (req: AuthRequest, res: Response) => {
+export const getLowStockProducts = async (req: Request, res: Response) => {
   const products = await productService.getLowStockProducts();
   res.json({ success: true, data: products });
 };

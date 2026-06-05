@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import { getAllUsers, getUserById, updateUserRole, updateUserStatus, deleteUser } from '../controllers/userController';
+import { verifyToken, requireAdmin } from '../middleware/auth';
+
 const router = express.Router();
-const { getAllUsers, getUserById, updateUserRole, updateUserStatus, deleteUser } = require('../controllers/userController');
-const { verifyToken, requireAdmin } = require('../middleware/auth');
 
 router.use(verifyToken, requireAdmin);
 router.get('/', getAllUsers);
@@ -10,4 +11,4 @@ router.put('/:id/role', updateUserRole);
 router.put('/:id/status', updateUserStatus);
 router.delete('/:id', deleteUser);
 
-module.exports = router;
+export default router;

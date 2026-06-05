@@ -1,9 +1,8 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import * as authService from '../services/authService';
 import User from '../models/User';
-import { AuthRequest } from '../middleware/auth';
 
-export const register = async (req: AuthRequest, res: Response) => {
+export const register = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ success: false, message: 'Name, email and password are required' });
@@ -12,7 +11,7 @@ export const register = async (req: AuthRequest, res: Response) => {
   res.status(201).json({ success: true, message: 'Registered successfully', data: result });
 };
 
-export const adminLogin = async (req: AuthRequest, res: Response) => {
+export const adminLogin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ success: false, message: 'Email and password are required' });
@@ -21,7 +20,7 @@ export const adminLogin = async (req: AuthRequest, res: Response) => {
   res.json({ success: true, message: 'Admin login successful', data: result });
 };
 
-export const login = async (req: AuthRequest, res: Response) => {
+export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ success: false, message: 'Email and password are required' });
@@ -30,11 +29,11 @@ export const login = async (req: AuthRequest, res: Response) => {
   res.json({ success: true, message: 'Login successful', data: result });
 };
 
-export const getMe = async (req: AuthRequest, res: Response) => {
+export const getMe = async (req: Request, res: Response) => {
   res.json({ success: true, data: req.user });
 };
 
-export const updateMe = async (req: AuthRequest, res: Response) => {
+export const updateMe = async (req: Request, res: Response) => {
   const { name, phone, address } = req.body;
   if (name !== undefined && !name.trim()) {
     return res.status(400).json({ success: false, message: 'Name cannot be empty' });
@@ -50,7 +49,7 @@ export const updateMe = async (req: AuthRequest, res: Response) => {
   res.json({ success: true, data: user, message: 'Profile updated' });
 };
 
-export const changePassword = async (req: AuthRequest, res: Response) => {
+export const changePassword = async (req: Request, res: Response) => {
   const { currentPassword, newPassword } = req.body;
   if (!currentPassword || !newPassword) {
     return res.status(400).json({ success: false, message: 'Current and new passwords required' });

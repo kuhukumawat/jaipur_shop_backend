@@ -2,8 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUserDocument } from '../models/User';
 
-export interface AuthRequest extends Request {
-  user?: IUserDocument;
+declare global {
+  namespace Express {
+    interface Request {
+      user?: IUserDocument;
+    }
+  }
 }
 
 interface DecodedToken {
@@ -12,7 +16,7 @@ interface DecodedToken {
   exp?: number;
 }
 
-export const verifyToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -34,7 +38,24 @@ export const verifyToken = async (req: AuthRequest, res: Response, next: NextFun
   }
 };
 
-export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const optionalVerifyToken = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as DecodedToken;
+      const user = await User.findById(decoded.userId);
+      if (user && user.isActive) {
+        req.user = user;
+      }
+    }
+  } catch (error) {
+    // Ignore error and proceed without auth info
+  }
+  next();
+};
+
+export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
   if (req.user && req.user.role === 'admin') {
     return next();
   }

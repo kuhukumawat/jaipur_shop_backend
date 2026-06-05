@@ -4,11 +4,11 @@ import { verifyToken } from '../middleware/auth';
 
 const router = express.Router();
 
-router.post('/register', register as any);
-router.post('/login', login as any);
-router.post('/admin/login', adminLogin as any);
-router.get('/me', verifyToken as any, getMe as any);
-router.put('/me', verifyToken as any, updateMe as any);
-router.put('/me/password', verifyToken as any, changePassword as any);
+router.post('/register', register);
+router.post('/login', login);
+router.post('/admin/login', adminLogin);
+router.get('/me', verifyToken, getMe);
+router.put('/me', verifyToken, updateMe);
+router.put('/me/password', verifyToken, changePassword);
 
 export default router;

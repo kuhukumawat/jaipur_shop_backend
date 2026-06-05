@@ -58,9 +58,7 @@ export const getProducts = async ({
 export const getProductById = async (id: string) => {
   const product = await Product.findById(id).populate('category', 'name slug');
   if (!product) {
-    const error = new Error('Product not found') as any;
-    error.statusCode = 404;
-    throw error;
+    throw Object.assign(new Error('Product not found'), { statusCode: 404 });
   }
   return product;
 };
@@ -71,9 +69,7 @@ export const updateProduct = async (id: string, data: Partial<IProduct>) => {
     runValidators: true,
   }).populate('category', 'name slug');
   if (!product) {
-    const error = new Error('Product not found') as any;
-    error.statusCode = 404;
-    throw error;
+    throw Object.assign(new Error('Product not found'), { statusCode: 404 });
   }
   return product;
 };
@@ -81,9 +77,7 @@ export const updateProduct = async (id: string, data: Partial<IProduct>) => {
 export const deleteProduct = async (id: string) => {
   const product = await Product.findByIdAndUpdate(id, { isActive: false }, { new: true });
   if (!product) {
-    const error = new Error('Product not found') as any;
-    error.statusCode = 404;
-    throw error;
+    throw Object.assign(new Error('Product not found'), { statusCode: 404 });
   }
   return product;
 };

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { ErrorRequestHandler } from 'express';
 
 export interface CustomError extends Error {
   statusCode?: number;
@@ -9,12 +9,12 @@ export interface CustomError extends Error {
   value?: any;
 }
 
-const errorHandler = (
-  err: CustomError,
-  req: Request,
-  res: Response,
-  _next: NextFunction
-): void => {
+const errorHandler: ErrorRequestHandler = (
+  err: any,
+  req,
+  res,
+  _next
+) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal Server Error';
 
@@ -29,7 +29,7 @@ const errorHandler = (
   if (err.name === 'ValidationError' && err.errors) {
     statusCode = 400;
     message = Object.values(err.errors)
-      .map((e) => e.message)
+      .map((e: any) => e.message)
       .join(', ');
   }
 

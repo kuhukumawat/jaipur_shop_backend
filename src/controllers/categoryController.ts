@@ -1,15 +1,14 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import Category from '../models/Category';
 import Product from '../models/Product';
-import { AuthRequest } from '../middleware/auth';
 
-export const getCategories = async (req: AuthRequest, res: Response) => {
+export const getCategories = async (req: Request, res: Response) => {
   const query = req.user?.role === 'admin' ? {} : { isActive: true };
   const categories = await Category.find(query).sort({ name: 1 });
   res.json({ success: true, data: categories });
 };
 
-export const createCategory = async (req: AuthRequest, res: Response) => {
+export const createCategory = async (req: Request, res: Response) => {
   const { name, description } = req.body;
   if (!name) return res.status(400).json({ success: false, message: 'Name is required' });
   const image = req.file ? `/uploads/${req.file.filename}` : undefined;
@@ -17,7 +16,7 @@ export const createCategory = async (req: AuthRequest, res: Response) => {
   res.status(201).json({ success: true, data: category, message: 'Category created' });
 };
 
-export const updateCategory = async (req: AuthRequest, res: Response) => {
+export const updateCategory = async (req: Request, res: Response) => {
   const data = { ...req.body };
   if (req.file) data.image = `/uploads/${req.file.filename}`;
   const category = await Category.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
@@ -25,7 +24,7 @@ export const updateCategory = async (req: AuthRequest, res: Response) => {
   res.json({ success: true, data: category, message: 'Category updated' });
 };
 
-export const deleteCategory = async (req: AuthRequest, res: Response) => {
+export const deleteCategory = async (req: Request, res: Response) => {
   const productCount = await Product.countDocuments({ category: req.params.id, isActive: true });
   if (productCount > 0) {
     return res.status(409).json({

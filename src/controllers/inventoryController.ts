@@ -1,18 +1,17 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import * as inventoryService from '../services/inventoryService';
-import { AuthRequest } from '../middleware/auth';
 
-export const getInventoryOverview = async (req: AuthRequest, res: Response) => {
+export const getInventoryOverview = async (req: Request, res: Response) => {
   const data = await inventoryService.getInventoryOverview();
   res.json({ success: true, data });
 };
 
-export const getLowStock = async (req: AuthRequest, res: Response) => {
+export const getLowStock = async (req: Request, res: Response) => {
   const data = await inventoryService.getLowStockProducts();
   res.json({ success: true, data });
 };
 
-export const getTransactions = async (req: AuthRequest, res: Response) => {
+export const getTransactions = async (req: Request, res: Response) => {
   const { productId, page, limit } = req.query;
   const result = await inventoryService.getTransactions(
     productId as string | null,
@@ -24,7 +23,7 @@ export const getTransactions = async (req: AuthRequest, res: Response) => {
 
 const ALLOWED_TYPES = ['stock_in', 'stock_out', 'adjustment'];
 
-export const adjustStock = async (req: AuthRequest, res: Response) => {
+export const adjustStock = async (req: Request, res: Response) => {
   const { productId, quantity, type, notes } = req.body;
   if (!productId || !quantity || !type) {
     return res.status(400).json({ success: false, message: 'productId, quantity, and type are required' });
@@ -42,7 +41,7 @@ export const adjustStock = async (req: AuthRequest, res: Response) => {
   const result = await inventoryService.adjustStock({
     productId,
     quantity: parsedQty,
-    type: type as any,
+    type: type as 'stock_in' | 'stock_out' | 'adjustment',
     notes,
     performedBy: req.user._id,
   });
