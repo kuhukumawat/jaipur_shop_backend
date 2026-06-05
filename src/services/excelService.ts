@@ -1,6 +1,14 @@
 import ExcelJS from 'exceljs';
-import Product from '../models/Product';
-import Order from '../models/Order';
+import { FilterQuery } from 'mongoose';
+import Product, { IProductDocument } from '../models/Product';
+import Order, { IOrderDocument, IOrderItem } from '../models/Order';
+
+type PopulatedOrder = Omit<IOrderDocument, 'user'> & {
+  user?: {
+    name: string;
+    email: string;
+  };
+};
 
 const HEADER_FILL: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1e3a5f' } };
 const HEADER_FONT: Partial<ExcelJS.Font> = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
@@ -44,7 +52,7 @@ const styleDataRow = (row: ExcelJS.Row, isAlt: boolean) => {
 };
 
 export const generateInventoryReport = async (): Promise<ExcelJS.Buffer> => {
-  const products = await Product.find({ isActive: true }).populate('category', 'name');
+  const products = await Product.find({ isActive: true });
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = process.env.SHOP_NAME || 'Jaipur Shop';
@@ -55,7 +63,6 @@ export const generateInventoryReport = async (): Promise<ExcelJS.Buffer> => {
   const columns = [
     { header: 'SKU', key: 'sku', width: 15 },
     { header: 'Product Name', key: 'name', width: 30 },
-    { header: 'Category', key: 'category', width: 18 },
     { header: 'Current Stock', key: 'stock', width: 15 },
     { header: 'Unit', key: 'unit', width: 10 },
     { header: 'Low Stock Threshold', key: 'threshold', width: 20 },
@@ -73,11 +80,10 @@ export const generateInventoryReport = async (): Promise<ExcelJS.Buffer> => {
   styleHeaderRow(headerRow);
   sheet.views = [{ state: 'frozen', ySplit: 4 }];
 
-  products.forEach((p: any, i: number) => {
+  products.forEach((p: IProductDocument, i: number) => {
     const row = sheet.addRow({
       sku: p.sku,
       name: p.name,
-      category: p.category?.name || 'N/A',
       stock: p.stock,
       unit: p.unit,
       threshold: p.lowStockThreshold,
@@ -110,14 +116,15 @@ export const generateInventoryReport = async (): Promise<ExcelJS.Buffer> => {
 };
 
 export const generateOrdersReport = async (startDate?: string, endDate?: string): Promise<ExcelJS.Buffer> => {
-  const query: any = {};
+  const query: FilterQuery<IOrderDocument> = {};
   if (startDate || endDate) {
     query.createdAt = {};
-    if (startDate) query.createdAt.$gte = new Date(startDate);
-    if (endDate) query.createdAt.$lte = new Date(endDate);
+    const createdAtQuery = query.createdAt as Record<string, Date>;
+    if (startDate) createdAtQuery.$gte = new Date(startDate);
+    if (endDate) createdAtQuery.$lte = new Date(endDate);
   }
 
-  const orders = await Order.find(query).populate('user', 'name email').sort({ createdAt: -1 });
+  const orders = (await Order.find(query).populate('user', 'name email').sort({ createdAt: -1 })) as unknown as PopulatedOrder[];
 
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Orders Report');
@@ -143,13 +150,13 @@ export const generateOrdersReport = async (startDate?: string, endDate?: string)
   headerRow.values = columns.map((c) => c.header);
   styleHeaderRow(headerRow);
 
-  orders.forEach((o: any, i: number) => {
+  orders.forEach((o: PopulatedOrder, i: number) => {
     const row = sheet.addRow({
       invoice: o.invoiceNumber,
       date: new Date(o.createdAt).toLocaleDateString('en-IN'),
       customer: o.user?.name || 'N/A',
       email: o.user?.email || 'N/A',
-      items: o.items.reduce((sum: number, item: any) => sum + item.quantity, 0),
+      items: o.items.reduce((sum: number, item: IOrderItem) => sum + item.quantity, 0),
       subtotal: o.subtotal,
       tax: o.tax,
       total: o.total,

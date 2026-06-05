@@ -2,38 +2,37 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateInvoiceHTML = void 0;
 const escapeHtml = (str) => String(str ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#039;');
 const generateInvoiceHTML = (order) => {
-    const shopName = process.env.SHOP_NAME || 'Jaipur Shop';
-    const formatCurrency = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n);
-    const itemsHTML = order.items
-        .map((item, i) => `
+  const shopName = process.env.SHOP_NAME || 'Jaipur Shop';
+  const formatCurrency = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n);
+  const itemsHTML = order.items
+    .map((item, i) => `
       <tr class="${i % 2 === 0 ? 'alt-row' : ''}">
         <td class="center">${i + 1}</td>
         <td>
           <strong>${escapeHtml(item.name)}</strong>
-          ${item.sku ? `<br><span class="muted">SKU: ${escapeHtml(item.sku)}</span>` : ''}
         </td>
         <td class="center">${item.quantity}</td>
         <td class="right">${formatCurrency(item.price)}</td>
         <td class="right">${formatCurrency(item.subtotal)}</td>
       </tr>`)
-        .join('');
-    const address = order.shippingAddress
-        ? [
-            order.shippingAddress.street,
-            order.shippingAddress.city,
-            order.shippingAddress.state,
-            order.shippingAddress.pincode,
-        ]
-            .filter(Boolean)
-            .join(', ')
-        : 'N/A';
-    return `<!DOCTYPE html>
+    .join('');
+  const address = order.shippingAddress
+    ? [
+      order.shippingAddress.street,
+      order.shippingAddress.city,
+      order.shippingAddress.state,
+      order.shippingAddress.pincode,
+    ]
+      .filter(Boolean)
+      .join(', ')
+    : 'N/A';
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />

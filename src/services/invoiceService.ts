@@ -1,3 +1,13 @@
+import { IOrder, IOrderItem } from '../models/Order';
+import { IUser } from '../models/User';
+
+export interface IPopulatedOrder extends Omit<IOrder, 'user'> {
+  user?: IUser;
+  invoiceNumber: string;
+  createdAt: Date;
+  items: IOrderItem[];
+}
+
 const escapeHtml = (str: string | undefined | null): string =>
   String(str ?? '')
     .replace(/&/g, '&amp;')
@@ -6,14 +16,14 @@ const escapeHtml = (str: string | undefined | null): string =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
-export const generateInvoiceHTML = (order: any): string => {
+export const generateInvoiceHTML = (order: IPopulatedOrder): string => {
   const shopName = process.env.SHOP_NAME || 'Jaipur Shop';
   const formatCurrency = (n: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n);
 
   const itemsHTML = order.items
     .map(
-      (item: any, i: number) => `
+      (item: IOrderItem, i: number) => `
       <tr class="${i % 2 === 0 ? 'alt-row' : ''}">
         <td class="center">${i + 1}</td>
         <td>

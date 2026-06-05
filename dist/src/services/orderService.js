@@ -40,7 +40,6 @@ const createOrder = async ({ userId, items, shippingAddress, paymentMethod, note
             orderItems.push({
                 product: product._id,
                 name: product.name,
-                sku: product.sku,
                 price: product.price,
                 quantity: item.quantity,
                 subtotal: itemSubtotal,
@@ -83,7 +82,7 @@ const createOrder = async ({ userId, items, shippingAddress, paymentMethod, note
         await session.commitTransaction();
         return Order_1.default.findById(order._id)
             .populate('user', 'name email phone address')
-            .populate('items.product', 'name sku images');
+            .populate('items.product', 'name images');
     }
     catch (error) {
         await session.abortTransaction();
@@ -97,7 +96,7 @@ exports.createOrder = createOrder;
 const getOrderById = async (orderId, userId = null, isAdmin = false) => {
     const order = await Order_1.default.findById(orderId)
         .populate('user', 'name email phone address')
-        .populate('items.product', 'name sku images');
+        .populate('items.product', 'name  images');
     if (!order) {
         throw Object.assign(new Error('Order not found'), { statusCode: 404 });
     }
@@ -112,7 +111,7 @@ const getUserOrders = async (userId, page = 1, limit = 10) => {
     const skip = (pNum - 1) * limit;
     const [orders, total] = await Promise.all([
         Order_1.default.find({ user: userId })
-            .populate('items.product', 'name sku images')
+            .populate('items.product', 'name  images')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit),

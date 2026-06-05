@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
-import User from '../models/User';
+import { FilterQuery } from 'mongoose';
+import User, { IUserDocument } from '../models/User';
 
 export const getAllUsers = async (req: Request, res: Response) => {
   const { page = 1, limit = 20, search } = req.query;
-  const query: any = {};
+  const query: FilterQuery<IUserDocument> = {};
   if (search) {
     const safe = (search as string).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     query.$or = [

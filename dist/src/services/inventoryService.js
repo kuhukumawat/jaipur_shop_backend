@@ -9,13 +9,10 @@ const Product_1 = __importDefault(require("../models/Product"));
 const InventoryTransaction_1 = __importDefault(require("../models/InventoryTransaction"));
 const getInventoryOverview = async () => {
     const products = await Product_1.default.find({ isActive: true })
-        .populate('category', 'name slug')
         .sort({ stock: 1 });
     return products.map((p) => ({
         _id: p._id,
         name: p.name,
-        sku: p.sku,
-        category: p.category,
         stock: p.stock,
         lowStockThreshold: p.lowStockThreshold,
         unit: p.unit,
@@ -31,7 +28,7 @@ const getLowStockProducts = async () => {
     return Product_1.default.find({
         isActive: true,
         $expr: { $lte: ['$stock', '$lowStockThreshold'] },
-    }).populate('category', 'name');
+    });
 };
 exports.getLowStockProducts = getLowStockProducts;
 const getTransactions = async (productId = null, page = 1, limit = 20) => {
@@ -42,7 +39,7 @@ const getTransactions = async (productId = null, page = 1, limit = 20) => {
     const skip = (pNum - 1) * limit;
     const [transactions, total] = await Promise.all([
         InventoryTransaction_1.default.find(query)
-            .populate('product', 'name sku')
+            .populate('product', 'name ')
             .populate('performedBy', 'name email')
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -68,7 +65,7 @@ const adjustStock = async ({ productId, quantity, type, notes, performedBy }) =>
         await Product_1.default.findByIdAndUpdate(productId, { stock: stockAfter }, { session });
         const [transaction] = await InventoryTransaction_1.default.create([{ product: productId, type, quantity: adjustedQty, stockBefore, stockAfter, notes, performedBy, referenceType: 'Manual' }], { session });
         await session.commitTransaction();
-        return { product: await Product_1.default.findById(productId).populate('category', 'name'), transaction };
+        return { product: await Product_1.default.findById(productId), transaction };
     }
     catch (error) {
         await session.abortTransaction();

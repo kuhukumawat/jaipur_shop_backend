@@ -1,17 +1,15 @@
-import mongoose, { Types } from 'mongoose';
+import mongoose, { Types, FilterQuery } from 'mongoose';
 import Product from '../models/Product';
-import InventoryTransaction from '../models/InventoryTransaction';
+import InventoryTransaction, { IInventoryTransactionDocument } from '../models/InventoryTransaction';
 
 export const getInventoryOverview = async () => {
   const products = await Product.find({ isActive: true })
-    .populate('category', 'name slug')
     .sort({ stock: 1 });
 
-  return products.map((p: any) => ({
+  return products.map((p) => ({
     _id: p._id,
     name: p.name,
     sku: p.sku,
-    category: p.category,
     stock: p.stock,
     lowStockThreshold: p.lowStockThreshold,
     unit: p.unit,
@@ -27,11 +25,11 @@ export const getLowStockProducts = async () => {
   return Product.find({
     isActive: true,
     $expr: { $lte: ['$stock', '$lowStockThreshold'] },
-  }).populate('category', 'name');
+  });
 };
 
 export const getTransactions = async (productId: string | null = null, page: number | string = 1, limit = 20) => {
-  const query: any = {};
+  const query: FilterQuery<IInventoryTransactionDocument> = {};
   if (productId) query.product = productId;
 
   const pNum = typeof page === 'string' ? parseInt(page) : page;
@@ -82,7 +80,7 @@ export const adjustStock = async ({ productId, quantity, type, notes, performedB
 
     await session.commitTransaction();
 
-    return { product: await Product.findById(productId).populate('category', 'name'), transaction };
+    return { product: await Product.findById(productId), transaction };
   } catch (error) {
     await session.abortTransaction();
     throw error;

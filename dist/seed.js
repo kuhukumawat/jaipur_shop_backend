@@ -9,7 +9,6 @@ const dns_1 = __importDefault(require("dns"));
 dns_1.default.setServers(['8.8.8.8', '1.1.1.1']);
 const mongoose_1 = __importDefault(require("mongoose"));
 const User_1 = __importDefault(require("./src/models/User"));
-const Category_1 = __importDefault(require("./src/models/Category"));
 const connectDB = async () => {
     await mongoose_1.default.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/jaipur_shop', { family: 4 });
     console.log('MongoDB Connected');
@@ -25,19 +24,10 @@ const seed = async () => {
             password: 'admin123',
             role: 'admin',
         });
-        console.log('✅ Admin created: admin@jaipurshop.com / admin123');
+        console.log('  Admin created: admin@jaipurshop.com / admin123');
     }
     else {
-        console.log('ℹ️  Admin already exists');
-    }
-    // Create sample categories
-    const cats = ['Fabric', 'Clothing', 'Accessories', 'Home Decor'];
-    for (const name of cats) {
-        const exists = await Category_1.default.findOne({ name });
-        if (!exists) {
-            await Category_1.default.create({ name });
-            console.log(`✅ Category created: ${name}`);
-        }
+        console.log('   Admin already exists');
     }
     console.log('\n🎉 Seed complete!');
     process.exit(0);

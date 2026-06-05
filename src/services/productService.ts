@@ -2,14 +2,13 @@ import Product, { IProduct } from '../models/Product';
 
 export const createProduct = async (data: Partial<IProduct>) => {
   const product = await Product.create(data);
-  return Product.findById(product._id).populate('category', 'name slug');
+  return Product.findById(product._id);
 };
 
 const escapeRegex = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 interface GetProductsParams {
   search?: string;
-  category?: string;
   page?: number | string;
   limit?: number | string;
   isAdmin?: boolean;
@@ -17,30 +16,26 @@ interface GetProductsParams {
 
 export const getProducts = async ({
   search,
-  category,
   page = 1,
   limit = 12,
   isAdmin = false,
 }: GetProductsParams = {}) => {
-  const query: any = {};
+  const query: { isActive?: boolean, $or?: Partial<{ name: { $regex: string, $options: string }, description: { $regex: string, $options: string } }>[] } = {};
   if (!isAdmin) query.isActive = true;
-  if (category) query.category = category;
   if (search) {
     const safe = escapeRegex(search);
     query.$or = [
       { name: { $regex: safe, $options: 'i' } },
       { description: { $regex: safe, $options: 'i' } },
-      { sku: { $regex: safe, $options: 'i' } },
     ];
   }
 
-  const pNum = typeof page === 'string' ? parseInt(page) : page;
-  const lNum = typeof limit === 'string' ? parseInt(limit) : limit;
+  const pNum = typeof page === 'string' ? parseInt(page, 10) : page;
+  const lNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
 
   const skip = (pNum - 1) * lNum;
   const [products, total] = await Promise.all([
     Product.find(query)
-      .populate('category', 'name slug')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(lNum),
@@ -56,7 +51,7 @@ export const getProducts = async ({
 };
 
 export const getProductById = async (id: string) => {
-  const product = await Product.findById(id).populate('category', 'name slug');
+  const product = await Product.findById(id);
   if (!product) {
     throw Object.assign(new Error('Product not found'), { statusCode: 404 });
   }
@@ -67,7 +62,7 @@ export const updateProduct = async (id: string, data: Partial<IProduct>) => {
   const product = await Product.findByIdAndUpdate(id, data, {
     new: true,
     runValidators: true,
-  }).populate('category', 'name slug');
+  });
   if (!product) {
     throw Object.assign(new Error('Product not found'), { statusCode: 404 });
   }
@@ -86,5 +81,5 @@ export const getLowStockProducts = async () => {
   return Product.find({
     isActive: true,
     $expr: { $lte: ['$stock', '$lowStockThreshold'] },
-  }).populate('category', 'name slug');
+  });
 };

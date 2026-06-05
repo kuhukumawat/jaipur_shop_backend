@@ -14,7 +14,6 @@ const errorHandler_1 = __importDefault(require("./middleware/errorHandler"));
 // Import routes
 const auth_1 = __importDefault(require("./routes/auth"));
 const products_1 = __importDefault(require("./routes/products"));
-const categories_1 = __importDefault(require("./routes/categories"));
 const cart_1 = __importDefault(require("./routes/cart"));
 const orders_1 = __importDefault(require("./routes/orders"));
 const inventory_1 = __importDefault(require("./routes/inventory"));
@@ -47,7 +46,6 @@ app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 
 // Routes
 app.use('/api/auth', auth_1.default);
 app.use('/api/products', products_1.default);
-app.use('/api/categories', categories_1.default);
 app.use('/api/cart', cart_1.default);
 app.use('/api/orders', orders_1.default);
 app.use('/api/inventory', inventory_1.default);

@@ -50,11 +50,10 @@ const createProduct = async (req, res) => {
 };
 exports.createProduct = createProduct;
 const getProducts = async (req, res) => {
-    const { search, category, page, limit } = req.query;
+    const { search, page, limit } = req.query;
     const isAdmin = req.user?.role === 'admin';
     const result = await productService.getProducts({
         search: search,
-        category: category,
         page: page,
         limit: limit,
         isAdmin,

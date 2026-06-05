@@ -3,14 +3,14 @@ import { ErrorRequestHandler } from 'express';
 export interface CustomError extends Error {
   statusCode?: number;
   code?: number;
-  keyValue?: Record<string, any>;
+  keyValue?: Record<string, unknown>;
   errors?: Record<string, { message: string }>;
   path?: string;
-  value?: any;
+  value?: unknown;
 }
 
 const errorHandler: ErrorRequestHandler = (
-  err: any,
+  err: CustomError,
   req,
   res,
   _next
@@ -29,7 +29,7 @@ const errorHandler: ErrorRequestHandler = (
   if (err.name === 'ValidationError' && err.errors) {
     statusCode = 400;
     message = Object.values(err.errors)
-      .map((e: any) => e.message)
+      .map((e) => e.message)
       .join(', ');
   }
 

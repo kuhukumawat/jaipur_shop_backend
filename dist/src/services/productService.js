@@ -7,16 +7,14 @@ exports.getLowStockProducts = exports.deleteProduct = exports.updateProduct = ex
 const Product_1 = __importDefault(require("../models/Product"));
 const createProduct = async (data) => {
     const product = await Product_1.default.create(data);
-    return Product_1.default.findById(product._id).populate('category', 'name slug');
+    return Product_1.default.findById(product._id);
 };
 exports.createProduct = createProduct;
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const getProducts = async ({ search, category, page = 1, limit = 12, isAdmin = false, } = {}) => {
+const getProducts = async ({ search, page = 1, limit = 12, isAdmin = false, } = {}) => {
     const query = {};
     if (!isAdmin)
         query.isActive = true;
-    if (category)
-        query.category = category;
     if (search) {
         const safe = escapeRegex(search);
         query.$or = [
@@ -30,7 +28,6 @@ const getProducts = async ({ search, category, page = 1, limit = 12, isAdmin = f
     const skip = (pNum - 1) * lNum;
     const [products, total] = await Promise.all([
         Product_1.default.find(query)
-            .populate('category', 'name slug')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(lNum),
@@ -45,7 +42,7 @@ const getProducts = async ({ search, category, page = 1, limit = 12, isAdmin = f
 };
 exports.getProducts = getProducts;
 const getProductById = async (id) => {
-    const product = await Product_1.default.findById(id).populate('category', 'name slug');
+    const product = await Product_1.default.findById(id);
     if (!product) {
         throw Object.assign(new Error('Product not found'), { statusCode: 404 });
     }
@@ -56,7 +53,7 @@ const updateProduct = async (id, data) => {
     const product = await Product_1.default.findByIdAndUpdate(id, data, {
         new: true,
         runValidators: true,
-    }).populate('category', 'name slug');
+    });
     if (!product) {
         throw Object.assign(new Error('Product not found'), { statusCode: 404 });
     }
@@ -75,6 +72,6 @@ const getLowStockProducts = async () => {
     return Product_1.default.find({
         isActive: true,
         $expr: { $lte: ['$stock', '$lowStockThreshold'] },
-    }).populate('category', 'name slug');
+    });
 };
 exports.getLowStockProducts = getLowStockProducts;

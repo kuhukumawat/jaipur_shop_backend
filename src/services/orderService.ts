@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import mongoose, { Types } from 'mongoose';
-import Order from '../models/Order';
+import mongoose, { Types, FilterQuery } from 'mongoose';
+import Order, { IOrderDocument, IOrderItem } from '../models/Order';
 import Product from '../models/Product';
 import Cart from '../models/Cart';
 import InventoryTransaction from '../models/InventoryTransaction';
@@ -37,7 +37,7 @@ export const createOrder = async ({ userId, items, shippingAddress, paymentMetho
   session.startTransaction();
 
   try {
-    const orderItems: any[] = [];
+    const orderItems: (IOrderItem & { product: mongoose.Types.ObjectId })[] = [];
     const stockMap = new Map<string, number>();
     let subtotal = 0;
 
@@ -167,7 +167,7 @@ interface GetAllOrdersParams {
 }
 
 export const getAllOrders = async ({ status, page = 1, limit = 20, search }: GetAllOrdersParams = {}) => {
-  const query: any = {};
+  const query: FilterQuery<IOrderDocument> = {};
   if (status) query.status = status;
   if (search) {
     const safe = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

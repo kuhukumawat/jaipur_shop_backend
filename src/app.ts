@@ -11,7 +11,7 @@ import errorHandler from './middleware/errorHandler';
 // Import routes
 import authRoutes from './routes/auth';
 import productRoutes from './routes/products';
-import categoryRoutes from './routes/categories';
+
 import cartRoutes from './routes/cart';
 import orderRoutes from './routes/orders';
 import inventoryRoutes from './routes/inventory';
@@ -52,7 +52,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/categories', categoryRoutes);
+
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/inventory', inventoryRoutes);

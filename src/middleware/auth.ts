@@ -33,7 +33,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 
     req.user = user;
     next();
-  } catch (error) {
+  } catch (_error) {
     return res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
 };
@@ -49,7 +49,7 @@ export const optionalVerifyToken = async (req: Request, res: Response, next: Nex
         req.user = user;
       }
     }
-  } catch (error) {
+  } catch (_error) {
     // Ignore error and proceed without auth info
   }
   next();

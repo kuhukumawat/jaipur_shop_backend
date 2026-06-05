@@ -9,7 +9,7 @@ export interface IProduct {
   name: string;
   description?: string;
   sku: string;
-  category: mongoose.Types.ObjectId;
+
   price: number;
   costPrice: number;
   images: IProductImage[];
@@ -29,7 +29,7 @@ const productSchema = new Schema<IProductDocument>(
     name: { type: String, required: true, trim: true },
     description: { type: String },
     sku: { type: String, required: true, unique: true, trim: true, uppercase: true },
-    category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+
     price: { type: Number, required: true, min: 0 },
     costPrice: { type: Number, required: true, min: 0 },
     images: [

@@ -45,15 +45,13 @@ const styleDataRow = (row, isAlt) => {
     });
 };
 const generateInventoryReport = async () => {
-    const products = await Product_1.default.find({ isActive: true }).populate('category', 'name');
+    const products = await Product_1.default.find({ isActive: true });
     const workbook = new exceljs_1.default.Workbook();
     workbook.creator = process.env.SHOP_NAME || 'Jaipur Shop';
     workbook.created = new Date();
     const sheet = workbook.addWorksheet('Inventory Report');
     const columns = [
-        { header: 'SKU', key: 'sku', width: 15 },
         { header: 'Product Name', key: 'name', width: 30 },
-        { header: 'Category', key: 'category', width: 18 },
         { header: 'Current Stock', key: 'stock', width: 15 },
         { header: 'Unit', key: 'unit', width: 10 },
         { header: 'Low Stock Threshold', key: 'threshold', width: 20 },
@@ -70,9 +68,7 @@ const generateInventoryReport = async () => {
     sheet.views = [{ state: 'frozen', ySplit: 4 }];
     products.forEach((p, i) => {
         const row = sheet.addRow({
-            sku: p.sku,
             name: p.name,
-            category: p.category?.name || 'N/A',
             stock: p.stock,
             unit: p.unit,
             threshold: p.lowStockThreshold,
@@ -103,12 +99,13 @@ const generateOrdersReport = async (startDate, endDate) => {
     const query = {};
     if (startDate || endDate) {
         query.createdAt = {};
+        const createdAtQuery = query.createdAt;
         if (startDate)
-            query.createdAt.$gte = new Date(startDate);
+            createdAtQuery.$gte = new Date(startDate);
         if (endDate)
-            query.createdAt.$lte = new Date(endDate);
+            createdAtQuery.$lte = new Date(endDate);
     }
-    const orders = await Order_1.default.find(query).populate('user', 'name email').sort({ createdAt: -1 });
+    const orders = (await Order_1.default.find(query).populate('user', 'name email').sort({ createdAt: -1 }));
     const workbook = new exceljs_1.default.Workbook();
     const sheet = workbook.addWorksheet('Orders Report');
     const columns = [
