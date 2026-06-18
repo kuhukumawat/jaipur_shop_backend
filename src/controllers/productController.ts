@@ -4,7 +4,7 @@ import * as productService from '../services/productService';
 export const createProduct = async (req: Request, res: Response) => {
   const files = (req.files as Express.Multer.File[]) || [];
   const images = files.map((f) => ({
-    url: `/uploads/${f.filename}`,
+    url: f.path,
     filename: f.filename,
   }));
 
@@ -43,7 +43,7 @@ export const updateProduct = async (req: Request, res: Response) => {
   if (files && files.length > 0) {
     data.$push = {
       images: {
-        $each: files.map((f) => ({ url: `/uploads/${f.filename}`, filename: f.filename })),
+        $each: files.map((f) => ({ url: f.path, filename: f.filename })),
       },
     };
     delete data.images;
